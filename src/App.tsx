@@ -151,6 +151,10 @@ export default function App() {
     if (tab === 'none') {
       setActiveFooterTab('none');
       window.scrollTo({ top: 0 });
+      // Update history state so back button behaves correctly
+      if (window.history.state && window.history.state.footerTab !== 'none') {
+        window.history.pushState({ footerTab: 'none' }, '');
+      }
     } else {
       // Open Adsterra Smartlink in a new tab upon selecting any of the 4 page links
       try {
@@ -179,7 +183,20 @@ export default function App() {
         setIsPageLoading(false);
         setActiveFooterTab(tab);
         window.scrollTo({ top: 0 }); // Hard-pinned secondary top scroll trigger
+        
+        // Push state to browser history when subpage has fully loaded
+        window.history.pushState({ footerTab: tab }, '');
       }, 1500);
+    }
+  };
+
+  // Safe Back controller to return to the main dashboard
+  const handleGoBackToMain = () => {
+    if (window.history.state && window.history.state.footerTab !== 'none' && window.history.state.footerTab !== undefined) {
+      window.history.back();
+    } else {
+      setActiveFooterTab('none');
+      window.scrollTo({ top: 0 });
     }
   };
 
@@ -207,6 +224,27 @@ export default function App() {
       });
     return () => {
       active = false;
+    };
+  }, []);
+
+  // Listen to popstate event to support browser back button and mobile hardware/gesture back actions
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.footerTab) {
+        setActiveFooterTab(event.state.footerTab);
+      } else {
+        setActiveFooterTab('none');
+      }
+    };
+    
+    // Set initial history state so we have a base to go back to when app first loads
+    if (!window.history.state || window.history.state.footerTab === undefined) {
+      window.history.replaceState({ footerTab: 'none' }, '');
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
     };
   }, []);
 
@@ -1171,7 +1209,7 @@ export default function App() {
                 <div className="flex flex-col gap-6 text-slate-650 text-sm leading-relaxed">
                   
                   {/* Box 1 */}
-                  <div className="bg-slate-50 border border-slate-200/50 p-6 sm:p-7 rounded-[2rem] space-y-4">
+                  <div className="space-y-4 py-3">
                     <h3 className="font-extrabold text-red-650 text-base uppercase tracking-wider flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
                       1. The Invisible Hazard of Algorithmic Compression
@@ -1193,7 +1231,7 @@ export default function App() {
                   </div>
 
                   {/* Box 2 */}
-                  <div className="bg-slate-50 border border-slate-200/50 p-6 sm:p-7 rounded-[2rem] space-y-4">
+                  <div className="space-y-4 py-3">
                     <h3 className="font-extrabold text-[#0f172a] text-base uppercase tracking-wider flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#0f172a]"></span>
                       2. The Mathematics of Alphanumeric stream preservation
@@ -1215,7 +1253,7 @@ export default function App() {
                   </div>
 
                   {/* Box 3 */}
-                  <div className="bg-slate-50 border border-slate-200/50 p-6 sm:p-7 rounded-[2rem] space-y-4">
+                  <div className="space-y-4 py-3">
                     <h3 className="font-extrabold text-[#16a34a] text-base uppercase tracking-wider flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#16a34a]"></span>
                       3. Eliminating Storage Databases: Client Sandbox Sovereignty
@@ -1237,7 +1275,7 @@ export default function App() {
                   </div>
 
                   {/* Box 4 */}
-                  <div className="bg-slate-50 border border-slate-200/50 p-6 sm:p-7 rounded-[2rem] space-y-4">
+                  <div className="space-y-4 py-3">
                     <h3 className="font-extrabold text-blue-700 text-base uppercase tracking-wider flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
                       4. Advanced Canvas Reconstruction Pipeline
@@ -1261,43 +1299,43 @@ export default function App() {
                 </div>
 
                 {/* Highlights grids detailing specific user controls */}
-                <div className="bg-white border border-slate-200/60 p-6 sm:p-8 rounded-[2rem] mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-slate-150">
                   
                   {/* Highlight 01 */}
-                  <div className="bg-slate-50 border border-slate-200/40 p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                  <div className="flex flex-col justify-between space-y-4 py-3">
                     <div className="space-y-2">
                       <span className="block font-black text-xs uppercase tracking-widest text-blue-600 font-mono">01. Lossless Compilation Box</span>
                       <p className="text-xs text-slate-500 leading-relaxed font-medium">
                         The primary drag-and-drop workspace triggers instant layout mapping. Once a master picture is selected, your image is loaded directly from local registers, displaying dimensional details on a smooth, modern visual card.
                       </p>
                     </div>
-                    <div className="pt-2 flex justify-center border-t border-slate-100">
+                    <div className="flex justify-center w-full">
                       <AdsterraBanner id="highlight-ad-1" format="320-50" />
                     </div>
                   </div>
 
                   {/* Highlight 02 */}
-                  <div className="bg-slate-50 border border-slate-200/40 p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                  <div className="flex flex-col justify-between space-y-4 py-3">
                     <div className="space-y-2">
                       <span className="block font-black text-xs uppercase tracking-widest text-[#16a34a] font-mono">02. 3s Scanning Laser Feedback</span>
                       <p className="text-xs text-slate-500 leading-relaxed font-bold">
                         Recreation launches an simulated blue computer laser diagnostic scanning operation. The viewport smoothly coordinates progress bars, compiling original byte blocks and loading the asset safely to the screen top.
                       </p>
                     </div>
-                    <div className="pt-2 flex justify-center border-t border-slate-100">
+                    <div className="flex justify-center w-full">
                       <AdsterraBanner id="highlight-ad-2" format="320-50" />
                     </div>
                   </div>
 
                   {/* Highlight 03 */}
-                  <div className="bg-slate-50 border border-slate-200/40 p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                  <div className="flex flex-col justify-between space-y-4 py-3">
                     <div className="space-y-2">
                       <span className="block font-black text-xs uppercase tracking-widest text-red-650 font-mono">03. High Performance Client Storage</span>
                       <p className="text-xs text-slate-500 leading-relaxed font-medium">
                         The dashboard stores safe local records of compiled images. Instantly reuse previously parsed items, copy raw hex text files, or trigger file package distribution with complete safety covenants.
                       </p>
                     </div>
-                    <div className="pt-2 flex justify-center border-t border-slate-100">
+                    <div className="flex justify-center w-full">
                       <AdsterraBanner id="highlight-ad-3" format="320-50" />
                     </div>
                   </div>
@@ -1321,10 +1359,10 @@ export default function App() {
             </div>
 
             <div className="bg-white shadow-xl rounded-[2rem] border border-slate-100 overflow-hidden">
-              {activeFooterTab === 'about' && <About onBack={() => navigateToTab('none')} />}
-              {activeFooterTab === 'privacy' && <Privacy onBack={() => navigateToTab('none')} />}
-              {activeFooterTab === 'terms' && <Terms onBack={() => navigateToTab('none')} />}
-              {activeFooterTab === 'contact' && <Contact onBack={() => navigateToTab('none')} />}
+              {activeFooterTab === 'about' && <About onBack={handleGoBackToMain} />}
+              {activeFooterTab === 'privacy' && <Privacy onBack={handleGoBackToMain} />}
+              {activeFooterTab === 'terms' && <Terms onBack={handleGoBackToMain} />}
+              {activeFooterTab === 'contact' && <Contact onBack={handleGoBackToMain} />}
             </div>
 
             {/* Bottom Page Outer Large Responsive Banner - direct big banner, no boxes/borders/clipping */}
